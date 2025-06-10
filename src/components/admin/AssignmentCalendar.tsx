@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Plus, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import BulkAssignment from "./BulkAssignment";
 
 interface Assignment {
   id: string;
@@ -109,6 +109,20 @@ const AssignmentCalendar = () => {
     });
   };
 
+  const handleBulkAssignments = (newAssignments: Array<{ date: string; memberId: string; memberName: string; memberRole: 'junior' | 'senior' }>) => {
+    const bulkAssignments: Assignment[] = newAssignments.map((assignment, index) => ({
+      id: (Date.now() + index).toString(),
+      ...assignment,
+      status: 'assigned' as const
+    }));
+
+    // Remove existing assignments for the same dates and add new ones
+    const existingDates = new Set(bulkAssignments.map(a => a.date));
+    const filteredExisting = assignments.filter(a => !existingDates.has(a.date));
+    
+    setAssignments([...filteredExisting, ...bulkAssignments]);
+  };
+
   const getDaysInMonth = (month: number, year: number) => {
     return new Date(year, month + 1, 0).getDate();
   };
@@ -163,6 +177,9 @@ const AssignmentCalendar = () => {
 
   return (
     <div className="space-y-6">
+      {/* Bulk Assignment Component */}
+      <BulkAssignment onAssignmentsGenerated={handleBulkAssignments} />
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

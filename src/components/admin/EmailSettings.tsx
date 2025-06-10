@@ -191,7 +191,7 @@ Have fun crafting your post!
               className="font-mono text-sm"
             />
             <p className="text-sm text-muted-foreground mt-1">
-              Available variables: {{memberName}}, {{memberRole}}, {{date}}, {{newsLinks}}
+              Available variables: memberName, memberRole, date, newsLinks
             </p>
           </div>
 
