@@ -7,54 +7,72 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AuthDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onLogin: (email: string, name: string, role: 'junior' | 'senior') => void;
 }
 
-const AuthDialog = ({ isOpen, onClose, onLogin }: AuthDialogProps) => {
+const AuthDialog = ({ isOpen, onClose }: AuthDialogProps) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState<'junior' | 'senior'>('junior');
-  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  
+  const { signIn, signUp } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email || !password || (isSignUp && !name)) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
       return;
     }
 
-    // Mock authentication - will be replaced with Supabase
-    console.log("Auth attempt:", { email, name, role, isSignUp });
-    
-    toast({
-      title: "Success",
-      description: isSignUp ? "Account created successfully!" : "Logged in successfully!",
-    });
+    setLoading(true);
 
-    onLogin(email, name || "User", role);
-    onClose();
+    try {
+      if (isSignUp) {
+        const { error } = await signUp(email, password, name, role);
+        if (!error) {
+          onClose();
+        }
+      } else {
+        const { error } = await signIn(email, password);
+        if (!error) {
+          onClose();
+        }
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetForm = () => {
+    setEmail("");
+    setPassword("");
+    setName("");
+    setRole('junior');
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open) {
+        resetForm();
+        onClose();
+      }
+    }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Club QOTD Manager</DialogTitle>
         </DialogHeader>
 
-        <Tabs value={isSignUp ? "signup" : "signin"} onValueChange={(value) => setIsSignUp(value === "signup")}>
+        <Tabs value={isSignUp ? "signup" : "signin"} onValueChange={(value) => {
+          setIsSignUp(value === "signup");
+          resetForm();
+        }}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="signin">Sign In</TabsTrigger>
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -90,8 +108,8 @@ const AuthDialog = ({ isOpen, onClose, onLogin }: AuthDialogProps) => {
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full">
-                    Sign In
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Signing In..." : "Sign In"}
                   </Button>
                 </form>
               </CardContent>
@@ -137,6 +155,7 @@ const AuthDialog = ({ isOpen, onClose, onLogin }: AuthDialogProps) => {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
                       required
+                      minLength={6}
                     />
                   </div>
                   <div>
@@ -151,8 +170,8 @@ const AuthDialog = ({ isOpen, onClose, onLogin }: AuthDialogProps) => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button type="submit" className="w-full">
-                    Create Account
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Creating Account..." : "Create Account"}
                   </Button>
                 </form>
               </CardContent>

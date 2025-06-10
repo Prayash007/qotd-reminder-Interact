@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LogOut, Calendar, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface User {
   id: string;
@@ -25,8 +25,10 @@ interface Assignment {
   daysUntil: number;
 }
 
-const MemberDashboard = ({ user, onLogout }: MemberDashboardProps) => {
-  // Mock data - will be replaced with Supabase queries
+const MemberDashboard = ({ user }: MemberDashboardProps) => {
+  const { signOut } = useAuth();
+  
+  // Mock data - will be replaced with real Supabase queries
   const [assignments] = useState<Assignment[]>([
     {
       id: '1',
@@ -94,7 +96,7 @@ const MemberDashboard = ({ user, onLogout }: MemberDashboardProps) => {
             <span className="text-sm text-muted-foreground">
               Welcome, {user.name}
             </span>
-            <Button variant="outline" size="sm" onClick={onLogout}>
+            <Button variant="outline" size="sm" onClick={signOut}>
               <LogOut className="h-4 w-4 mr-2" />
               Logout
             </Button>

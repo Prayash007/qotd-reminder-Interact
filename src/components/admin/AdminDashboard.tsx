@@ -1,9 +1,9 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LogOut, Users, Calendar, Settings, Mail } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import MemberManagement from "./MemberManagement";
 import AssignmentCalendar from "./AssignmentCalendar";
 import EmailSettings from "./EmailSettings";
@@ -20,10 +20,11 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
+const AdminDashboard = ({ user }: AdminDashboardProps) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'assignments' | 'email'>('overview');
+  const { signOut } = useAuth();
 
-  // Mock data - will be replaced with Supabase queries
+  // Mock stats for now - will be replaced with real data
   const mockStats = {
     totalMembers: 12,
     assignmentsThisMonth: 25,
@@ -42,6 +43,7 @@ const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
       default:
         return (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Members</CardTitle>
@@ -106,7 +108,7 @@ const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
             <span className="text-sm text-muted-foreground">
               Welcome, {user.name}
             </span>
-            <Button variant="outline" size="sm" onClick={onLogout}>
+            <Button variant="outline" size="sm" onClick={signOut}>
               <LogOut className="h-4 w-4 mr-2" />
               Logout
             </Button>
